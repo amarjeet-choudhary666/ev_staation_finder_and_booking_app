@@ -17,4 +17,12 @@ func RegisterRoutes(r *gin.Engine) {
 
 	api.POST("/bookings", controllers.CreateBooking)
 	api.GET("/bookings/user", controllers.GetUserBookings)
+
+	// Health check endpoints
+	r.GET("/health", controllers.HealthCheck)
+	r.GET("/readiness", controllers.ReadinessCheck)
+
+	// Metrics endpoints
+	r.GET("/metrics/cache", controllers.GetCacheMetrics)
+	r.POST("/metrics/cache/reset", controllers.ResetCacheMetrics)
 }

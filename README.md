@@ -47,4 +47,4 @@ Bcrypt	Password hashing and authentication
 JWT	Secure token-based authentication
 
 
-RUN PROJECT: go run cmd/main.go
+RUN PROJECT: go run cmd/main.go || make run

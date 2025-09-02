@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/amarjeetdev/ev-charging-app/db"
 	"github.com/amarjeetdev/ev-charging-app/models"
+	"github.com/amarjeetdev/ev-charging-app/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,12 +18,14 @@ func CreateStation(c *gin.Context) {
 		return
 	}
 
-	if err := db.DB.Where("address = ?", station.Address).First(&station).Error; err == nil {
+	// Check if station already exists
+	var existingStation models.Station
+	if err := db.DB.Where("address = ?", station.Address).First(&existingStation).Error; err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "station already exists"})
 		return
 	}
 
-	if err := db.DB.Create(&station).Error; err != nil {
+	if err := services.CreateStation(&station); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create station"})
 		return
 	}
@@ -30,26 +34,25 @@ func CreateStation(c *gin.Context) {
 }
 
 func GetAllStations(c *gin.Context) {
-	var station []models.Station
-
-	if err := db.DB.Find(&station).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "status not found"})
-		return
-	}
-
-	if err := db.DB.Find(&station).Error; err != nil {
+	stations, err := services.GetAllStations()
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get stations"})
 		return
 	}
 
-	c.JSON(http.StatusOK, station)
+	c.JSON(http.StatusOK, stations)
 }
 
 func GetStationDetails(c *gin.Context) {
-	id := c.Param("id")
-	var station models.Station
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid station id"})
+		return
+	}
 
-	if err := db.DB.First(&station, id).Error; err != nil {
+	station, err := services.GetStationByID(uint(id))
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Station not found"})
 		return
 	}

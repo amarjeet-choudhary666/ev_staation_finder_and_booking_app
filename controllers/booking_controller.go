@@ -2,10 +2,11 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
-	"github.com/amarjeetdev/ev-charging-app/db"
 	"github.com/amarjeetdev/ev-charging-app/models"
+	"github.com/amarjeetdev/ev-charging-app/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,12 +22,8 @@ func CreateBooking(c *gin.Context) {
 		return
 	}
 
-	var conflicts []models.Booking
-	if err := db.DB.Where("station_id = ? AND status != ? AND ((start_time < ? AND end_time > ?) OR (start_time < ? AND end_time > ?))",
-		booking.StationID, "cancelled",
-		booking.EndTime, booking.StartTime,
-		booking.EndTime, booking.StartTime).
-		Find(&conflicts).Error; err != nil {
+	conflicts, err := services.CheckBookingConflicts(booking.StationID, booking.StartTime, booking.EndTime)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check for conflicts"})
 		return
 	}
@@ -41,7 +38,7 @@ func CreateBooking(c *gin.Context) {
 		return
 	}
 
-	if err := db.DB.Create(&booking).Error; err != nil {
+	if err := services.CreateBooking(&booking); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create booking"})
 		return
 	}
@@ -50,10 +47,15 @@ func CreateBooking(c *gin.Context) {
 }
 
 func GetUserBookings(c *gin.Context) {
-	userId := c.Query("user_id")
+	userIdStr := c.Query("user_id")
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+		return
+	}
 
-	var bookings []models.Booking
-	if err := db.DB.Where("user_id = ?", userId).Find(&bookings).Error; err != nil {
+	bookings, err := services.GetUserBookings(uint(userId))
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch bookings"})
 		return
 	}

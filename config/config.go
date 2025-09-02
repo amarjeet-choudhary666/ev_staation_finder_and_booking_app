@@ -7,9 +7,11 @@ import (
 )
 
 type Config struct {
-	DatabaseURL string `mapstructure:"DATABASE_URL"`
-	JWTSecret   string `mapstructure:"JWT_SECRET"`
-	AppPort     string `mapstructure:"PORT"`
+	DatabaseURL  string `mapstructure:"DATABASE_URL"`
+	JWTSecret    string `mapstructure:"JWT_SECRET"`
+	AppPort      string `mapstructure:"PORT"`
+	RedisAddr    string `mapstructure:"REDIS_ADDR"`
+	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
 }
 
 func LoadConfig() (Config, error) {

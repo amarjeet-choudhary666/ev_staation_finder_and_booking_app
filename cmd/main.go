@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/amarjeetdev/ev-charging-app/db"
+	"github.com/amarjeetdev/ev-charging-app/middleware"
 	"github.com/amarjeetdev/ev-charging-app/models"
 	"github.com/amarjeetdev/ev-charging-app/routes"
 	"github.com/gin-gonic/gin"
@@ -19,12 +20,17 @@ func main() {
 
 	r := gin.Default()
 
+	// Apply rate limiter middleware globally
+	r.Use(middleware.RateLimiter())
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
 	db.ConnectDatabase()
+	db.ConnectRedis()
+
 	err := db.DB.AutoMigrate(&models.Booking{}, &models.Station{}, &models.User{})
 
 	if err != nil {
