@@ -2,15 +2,13 @@ module github.com/amarjeetdev/ev-charging-app
 
 go 1.24.3
 
+
 require (
-	github.com/gin-gonic/gin v1.10.1
+    github.com/gin-gonic/gin v1.10.1
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/viper v1.20.1
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.30.0
-)
-
-require (
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
