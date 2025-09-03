@@ -1,6 +1,4 @@
-//Work in progress
-
-// The EV Finder Station and Booking App is a backend RESTful API service designed to help electric vehicle users locate nearby charging stations, view details, and book charging slots efficiently. Built using Golang, this application leverages powerful tools such as Gin for routing, GORM for database interaction with PostgreSQL, and Bcrypt for secure password hashing.
+The EV Finder Station and Booking App is a backend RESTful API service designed to help electric vehicle users locate nearby charging stations, view details, and book charging slots efficiently. Built using Golang, this application leverages powerful tools such as Gin for routing, GORM for database interaction with PostgreSQL, and Bcrypt for secure password hashing.
 
 🔐 User Authentication & Authorization
 
