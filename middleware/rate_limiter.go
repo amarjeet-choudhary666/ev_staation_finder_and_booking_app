@@ -17,6 +17,12 @@ const (
 
 func RateLimiter() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Skip rate limiting if Redis is not available
+		if db.RedisClient == nil {
+			c.Next()
+			return
+		}
+
 		clientIP := c.ClientIP()
 		key := "rate_limit:" + clientIP
 

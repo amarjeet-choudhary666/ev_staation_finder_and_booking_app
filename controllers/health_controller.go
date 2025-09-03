@@ -42,7 +42,7 @@ func HealthCheck(c *gin.Context) {
 		status.Status = "unhealthy"
 	}
 
-	// Check Redis connection
+	// Check Redis connection (optional for development)
 	if db.RedisClient != nil {
 		_, err := db.RedisClient.Ping(db.Ctx).Result()
 		if err != nil {
@@ -52,24 +52,24 @@ func HealthCheck(c *gin.Context) {
 			status.Services["redis"] = "healthy"
 		}
 	} else {
-		status.Services["redis"] = "not connected"
-		status.Status = "unhealthy"
+		status.Services["redis"] = "disabled (optional for development)"
+		// Don't mark as unhealthy if Redis is optional
 	}
 
 	c.JSON(http.StatusOK, status)
 }
 
 func ReadinessCheck(c *gin.Context) {
-	// Check if both DB and Redis are connected
-	if db.DB == nil || db.RedisClient == nil {
+	// Check if DB is connected (Redis is optional)
+	if db.DB == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status": "not ready",
-			"reason": "services not initialized",
+			"reason": "database not initialized",
 		})
 		return
 	}
 
-	// Quick ping checks
+	// Quick ping checks for database
 	sqlDB, err := db.DB.DB()
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
@@ -87,12 +87,15 @@ func ReadinessCheck(c *gin.Context) {
 		return
 	}
 
-	if _, err := db.RedisClient.Ping(db.Ctx).Result(); err != nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"status": "not ready",
-			"reason": "redis ping failed",
-		})
-		return
+	// Check Redis only if it's available
+	if db.RedisClient != nil {
+		if _, err := db.RedisClient.Ping(db.Ctx).Result(); err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"status": "not ready",
+				"reason": "redis ping failed",
+			})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
